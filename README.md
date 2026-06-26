@@ -40,6 +40,19 @@ make build          # produces ./bin/fd
 go install github.com/startvibecoding/go-fd/cmd/fd@latest
 ```
 
+### As a Go library
+
+```bash
+go get github.com/startvibecoding/go-fd@latest
+```
+
+Then import the module root. The import path contains `go-fd`, but the package
+name is `gofd`:
+
+```go
+import gofd "github.com/startvibecoding/go-fd"
+```
+
 ### Via the install script
 
 ```bash
@@ -169,6 +182,33 @@ traversal (`MaxDepth`, `MinDepth`, `FollowLinks`, `Prune`, `Threads`), filters
 
 For lower-level control, the `github.com/startvibecoding/go-fd/pkg/finder`
 package lets you build a `finder.Config` directly and call `finder.New(cfg)`.
+
+## Go module compatibility
+
+The module path is:
+
+```text
+github.com/startvibecoding/go-fd
+```
+
+It has no external Go dependencies and declares Go 1.21 as its minimum version.
+Other Go projects can depend on it with `go get github.com/startvibecoding/go-fd@latest`
+or a specific tagged version.
+
+When publishing Git tags for Go consumers, use semantic module tags that match
+the module path. Because the path does not include a major-version suffix like
+`/v2`, publish library-compatible tags as `v0.x.y` or `v1.x.y`. The CLI can
+still report the upstream fd compatibility version, such as `10.4.2-go`, through
+`fd --version`.
+
+Before pushing a release tag:
+
+```bash
+gofmt -l .
+go vet ./...
+go test ./...
+go list ./...
+```
 
 ## Project layout
 

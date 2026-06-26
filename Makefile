@@ -6,7 +6,7 @@
 
 # Variables
 BINARY_NAME=fd
-VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || grep -oP 'const version = "\K[^"]+' cmd/fd/help.go 2>/dev/null || echo "10.4.2-go")
+VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || grep -oP 'var version = "\K[^"]+' cmd/fd/main.go 2>/dev/null || echo "10.4.2-go")
 PRE_VERSION=$(if $(filter %-pre,$(VERSION)),$(VERSION),$(VERSION)-pre)
 LDFLAGS=-ldflags "-s -w -X main.version=$(VERSION)"
 GOBUILD_FLAGS=-trimpath

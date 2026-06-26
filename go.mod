@@ -1,3 +1,3 @@
 module github.com/startvibecoding/go-fd
 
-go 1.26.1
+go 1.21

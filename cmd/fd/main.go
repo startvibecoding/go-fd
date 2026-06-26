@@ -13,7 +13,7 @@ import (
 	gofd "github.com/startvibecoding/go-fd"
 )
 
-const version = "10.4.2-go"
+var version = "10.4.2-go"
 
 func main() {
 	os.Exit(int(run(os.Args[1:])))

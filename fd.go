@@ -4,6 +4,8 @@
 //
 // Typical SDK usage:
 //
+//	import gofd "github.com/startvibecoding/go-fd"
+//
 //	results, err := gofd.Find(context.Background(), gofd.Options{
 //	    Pattern: "\\.go$",
 //	    Paths:   []string{"."},

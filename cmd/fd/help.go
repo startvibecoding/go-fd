@@ -69,6 +69,6 @@ OPTIONS:
     -h, --help                    Print help
     -V, --version                 Print version
 
-Bugs can be reported on GitHub: https://github.com/sharkdp/fd/issues
+Bugs can be reported on GitHub: https://github.com/startvibecoding/go-fd/issues
 `)
 }

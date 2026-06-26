@@ -60,7 +60,7 @@ Requirements before considering a change done:
 - `go vet ./...` is clean.
 - `go test ./...` passes.
 
-Module path is `github.com/startvibecoding/go-fd` (Go 1.26+). Internal imports
+Module path is `github.com/startvibecoding/go-fd` (Go 1.21+). Internal imports
 use that prefix, e.g. `github.com/startvibecoding/go-fd/pkg/finder`. The SDK is
 imported as `gofd "github.com/startvibecoding/go-fd"`.
 
