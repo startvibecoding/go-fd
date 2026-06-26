@@ -145,22 +145,18 @@ type Result struct {
 }
 
 // Find runs the search and returns all matching paths, sorted lexicographically.
-// It is a convenience wrapper around Stream that collects results.
+// It is a convenience wrapper around Stream that collects results. Non-fatal
+// traversal errors are drained and discarded; use Stream to observe them.
 func (f *Finder) Find(ctx context.Context, paths []string) ([]string, error) {
 	results, errs := f.Stream(ctx, paths)
 	var out []string
 	for r := range results {
 		out = append(out, r.Path)
 	}
-	// Drain errors (non-fatal); return the first if any was recorded.
-	var firstErr error
-	for e := range errs {
-		if firstErr == nil {
-			firstErr = e
-		}
+	for range errs {
 	}
 	sort.Strings(out)
-	return out, firstErr
+	return out, nil
 }
 
 // Stream runs the search and streams results over a channel. A second channel

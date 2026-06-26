@@ -57,7 +57,20 @@ func run(args []string) gofd.ExitCode {
 		return 1
 	}
 
-	f, paths, err := gofd.Compile(opts)
+	paths, invalidPaths, err := gofd.ValidateSearchPaths(opts)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[fd error]: %v\n", err)
+		return 1
+	}
+	for _, p := range invalidPaths {
+		fmt.Fprintf(os.Stderr, "[fd error]: Search path '%s' is not a directory.\n", p)
+	}
+	if len(paths) == 0 {
+		fmt.Fprintf(os.Stderr, "[fd error]: No valid search paths given.\n")
+		return 1
+	}
+
+	f, _, err := gofd.Compile(opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[fd error]: %v\n", err)
 		return 1

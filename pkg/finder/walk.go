@@ -32,6 +32,7 @@ type dirJob struct {
 	path        string
 	depth       int
 	ignoreStack []*ignore.Gitignore
+	allowVCS    bool
 }
 
 // runWalk traverses the given search paths, applying filters, and emits matches
@@ -69,9 +70,9 @@ func (f *Finder) runWalk(ctx context.Context, paths []string, results chan worke
 	var wg sync.WaitGroup
 
 	for _, root := range paths {
-		stack := w.initialStack(root)
+		stack, allowVCS := w.initialStack(root)
 		wg.Add(1)
-		go w.process(dirJob{path: root, depth: 0, ignoreStack: stack}, sem, &wg)
+		go w.process(dirJob{path: root, depth: 0, ignoreStack: stack, allowVCS: allowVCS}, sem, &wg)
 	}
 
 	go func() {
@@ -82,8 +83,9 @@ func (f *Finder) runWalk(ctx context.Context, paths []string, results chan worke
 
 // initialStack builds the ignore stack for a search root, optionally pulling in
 // ignore files from parent directories.
-func (w *walker) initialStack(root string) []*ignore.Gitignore {
+func (w *walker) initialStack(root string) ([]*ignore.Gitignore, bool) {
 	var stack []*ignore.Gitignore
+	allowVCS := !w.cfg.RequireGit || insideGitRepo(root)
 	if w.globalIgnore != nil {
 		stack = append(stack, w.globalIgnore)
 	}
@@ -104,16 +106,16 @@ func (w *walker) initialStack(root string) []*ignore.Gitignore {
 			}
 			// Outermost first.
 			for i := len(parents) - 1; i >= 0; i-- {
-				stack = append(stack, w.loadIgnores(parents[i])...)
+				stack = append(stack, w.loadIgnores(parents[i], allowVCS)...)
 			}
 		}
 	}
-	return stack
+	return stack, allowVCS
 }
 
 // loadIgnores reads ignore files present in dir and returns matchers anchored
 // to dir.
-func (w *walker) loadIgnores(dir string) []*ignore.Gitignore {
+func (w *walker) loadIgnores(dir string, allowVCS bool) []*ignore.Gitignore {
 	var out []*ignore.Gitignore
 	add := func(name string) {
 		p := filepath.Join(dir, name)
@@ -121,7 +123,7 @@ func (w *walker) loadIgnores(dir string) []*ignore.Gitignore {
 			out = append(out, gi)
 		}
 	}
-	if w.cfg.ReadVcsignore {
+	if w.cfg.ReadVcsignore && allowVCS {
 		add(".gitignore")
 		// .git/info/exclude
 		p := filepath.Join(dir, ".git", "info", "exclude")
@@ -150,7 +152,7 @@ func (w *walker) process(job dirJob, sem chan struct{}, wg *sync.WaitGroup) {
 
 	for _, sd := range subdirs {
 		wg.Add(1)
-		go w.process(dirJob{path: sd, depth: job.depth + 1, ignoreStack: stack}, sem, wg)
+		go w.process(dirJob{path: sd, depth: job.depth + 1, ignoreStack: stack, allowVCS: job.allowVCS}, sem, wg)
 	}
 }
 
@@ -174,7 +176,7 @@ func (w *walker) processDir(job dirJob) ([]string, []*ignore.Gitignore) {
 
 	// Load ignore files in this directory and extend the stack.
 	stack := job.ignoreStack
-	if newIgnores := w.loadIgnores(job.path); len(newIgnores) > 0 {
+	if newIgnores := w.loadIgnores(job.path, job.allowVCS); len(newIgnores) > 0 {
 		stack = append(append([]*ignore.Gitignore{}, job.ignoreStack...), newIgnores...)
 	}
 
@@ -319,4 +321,22 @@ func globalIgnorePath() string {
 		return ""
 	}
 	return filepath.Join(home, ".config", "fd", "ignore")
+}
+
+func insideGitRepo(path string) bool {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	dir := abs
+	for {
+		if _, err := os.Lstat(filepath.Join(dir, ".git")); err == nil {
+			return true
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return false
+		}
+		dir = parent
+	}
 }

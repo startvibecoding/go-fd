@@ -117,6 +117,28 @@ type Options struct {
 
 // Compile validates the options, builds the finder and resolves search paths.
 func Compile(opts Options) (*finder.Finder, []string, error) {
+	f, err := compileFinder(opts)
+	if err != nil {
+		return nil, nil, err
+	}
+	paths, _, err := resolveSearchPaths(opts)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(paths) == 0 {
+		return nil, nil, fmt.Errorf("No valid search paths given.")
+	}
+	return f, paths, nil
+}
+
+// ValidateSearchPaths resolves valid search roots and reports invalid ones
+// without printing anything. It is primarily useful for callers that want to
+// preserve CLI-style diagnostics while keeping SDK operations silent.
+func ValidateSearchPaths(opts Options) ([]string, []string, error) {
+	return resolveSearchPaths(opts)
+}
+
+func compileFinder(opts Options) (*finder.Finder, error) {
 	if opts.Unrestricted {
 		opts.NoIgnore = true
 		opts.Hidden = true
@@ -130,7 +152,7 @@ func Compile(opts Options) (*finder.Finder, []string, error) {
 	for _, p := range patterns {
 		s, err := buildPatternRegex(p, opts)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		regexStrs = append(regexStrs, s)
 	}
@@ -140,7 +162,7 @@ func Compile(opts Options) (*finder.Finder, []string, error) {
 
 	cfg, err := buildConfig(opts, caseSensitive)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Compile regexes.
@@ -152,25 +174,17 @@ func Compile(opts Options) (*finder.Finder, []string, error) {
 		}
 		re, err := regexp.Compile(flags + s)
 		if err != nil {
-			return nil, nil, fmt.Errorf("%w\n\nNote: You can search for literal substrings with FixedStrings or Exact options, or use Glob matching.", err)
+			return nil, fmt.Errorf("%w\n\nNote: You can search for literal substrings with FixedStrings or Exact options, or use Glob matching.", err)
 		}
 		compiled = append(compiled, re)
 	}
 
 	f, err := finder.New(cfg)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	f.SetPatterns(compiled)
-
-	paths, err := searchPaths(opts)
-	if err != nil {
-		return nil, nil, err
-	}
-	if len(paths) == 0 {
-		return nil, nil, fmt.Errorf("No valid search paths given.")
-	}
-	return f, paths, nil
+	return f, nil
 }
 
 // Find runs a search and returns matching paths sorted lexicographically.
@@ -410,24 +424,25 @@ func parseFileTypes(values []string) (*finder.FileTypes, error) {
 	return ft, nil
 }
 
-func searchPaths(opts Options) ([]string, error) {
+func resolveSearchPaths(opts Options) ([]string, []string, error) {
 	paths := opts.Paths
 	if len(paths) == 0 {
 		cwd := "./"
 		if !isExistingDir(cwd) {
-			return nil, fmt.Errorf("Could not retrieve current directory (has it been deleted?).")
+			return nil, nil, fmt.Errorf("Could not retrieve current directory (has it been deleted?).")
 		}
-		return []string{normalizePath(cwd, opts.AbsolutePath)}, nil
+		return []string{normalizePath(cwd, opts.AbsolutePath)}, nil, nil
 	}
 	var out []string
+	var invalid []string
 	for _, p := range paths {
 		if isExistingDir(p) {
 			out = append(out, normalizePath(p, opts.AbsolutePath))
 		} else {
-			fmt.Fprintf(os.Stderr, "[fd error]: Search path '%s' is not a directory.\n", p)
+			invalid = append(invalid, p)
 		}
 	}
-	return out, nil
+	return out, invalid, nil
 }
 
 func normalizePath(path string, absolute bool) string {

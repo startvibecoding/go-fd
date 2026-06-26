@@ -1,9 +1,11 @@
 package tests
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"testing"
 
@@ -30,6 +32,9 @@ func setupTree(t *testing.T) string {
 	mustWrite(".hidden", "secret")
 	mustWrite("Makefile", "all:")
 	mustWrite(".gitignore", "node_modules\n*.md\n")
+	if err := os.Mkdir(filepath.Join(root, ".git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
 	return root
 }
 
@@ -169,6 +174,169 @@ func TestSDKStream(t *testing.T) {
 	}
 }
 
+func TestSDKRequireGitDefaultOutsideRepo(t *testing.T) {
+	root := t.TempDir()
+	if pathInsideGitRepo(root) {
+		t.Skipf("temp dir %q is inside a git repo in this environment", root)
+	}
+	mustWrite := func(rel, content string) {
+		p := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mustWrite(".gitignore", "*.md\n")
+	mustWrite("README.md", "docs")
+
+	got, err := gofd.Find(context.Background(), gofd.Options{
+		Paths:          []string{root},
+		NoGlobalIgnore: true,
+		NoIgnoreParent: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := relSorted(t, root, got)
+	want := []string{"README.md"}
+	if !equal(rel, want) {
+		t.Fatalf("got %v, want %v", rel, want)
+	}
+}
+
+func TestSDKNoRequireGitOutsideRepo(t *testing.T) {
+	root := t.TempDir()
+	if pathInsideGitRepo(root) {
+		t.Skipf("temp dir %q is inside a git repo in this environment", root)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".gitignore"), []byte("*.md\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("docs"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := gofd.Find(context.Background(), gofd.Options{
+		Paths:          []string{root},
+		NoRequireGit:   true,
+		NoGlobalIgnore: true,
+		NoIgnoreParent: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected README.md to be ignored outside a repo when NoRequireGit is set, got %v", relSorted(t, root, got))
+	}
+}
+
+func TestSDKRequireGitInsideRepo(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, ".git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".gitignore"), []byte("*.md\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("docs"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := gofd.Find(context.Background(), gofd.Options{
+		Paths:          []string{root},
+		NoGlobalIgnore: true,
+		NoIgnoreParent: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected README.md to be ignored inside a repo, got %v", relSorted(t, root, got))
+	}
+}
+
+func TestSDKInvalidPathsStaySilent(t *testing.T) {
+	root := setupTree(t)
+	invalid := filepath.Join(root, "missing")
+
+	oldStderr := os.Stderr
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stderr = w
+	defer func() { os.Stderr = oldStderr }()
+
+	got, findErr := gofd.Find(context.Background(), gofd.Options{
+		Pattern: `\.go$`,
+		Paths:   []string{root, invalid},
+	})
+
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	var stderr bytes.Buffer
+	if _, err := stderr.ReadFrom(r); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	if findErr != nil {
+		t.Fatal(findErr)
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("expected SDK path validation to stay silent, got stderr %q", stderr.String())
+	}
+	if rel := relSorted(t, root, got); !equal(rel, []string{"src/main.go", "src/util.go"}) {
+		t.Fatalf("got %v", rel)
+	}
+}
+
+func TestSDKFindIgnoresNonFatalTraversalErrors(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("permission semantics differ on Windows")
+	}
+
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "ok.txt"), []byte("ok"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	blocked := filepath.Join(root, "blocked")
+	if err := os.Mkdir(blocked, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(blocked, "secret.txt"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(blocked, 0); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chmod(blocked, 0o755)
+
+	if _, err := os.ReadDir(blocked); err == nil {
+		t.Skip("unable to induce traversal error in this environment")
+	}
+
+	got, err := gofd.Find(context.Background(), gofd.Options{Paths: []string{root}})
+	if err != nil {
+		t.Fatalf("expected non-fatal traversal errors to stay out of Find error, got %v", err)
+	}
+	found := false
+	for _, p := range got {
+		if filepath.Base(p) == "ok.txt" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("expected successful matches despite traversal error, got %v", relSorted(t, root, got))
+	}
+}
+
 func equal(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
@@ -179,4 +347,22 @@ func equal(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func pathInsideGitRepo(path string) bool {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	dir := abs
+	for {
+		if _, err := os.Lstat(filepath.Join(dir, ".git")); err == nil {
+			return true
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return false
+		}
+		dir = parent
+	}
 }
