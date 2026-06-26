@@ -5,7 +5,7 @@ user-friendly alternative to `find`. It provides both a CLI tool (`fd`) that
 mirrors the original's interface and a Go SDK for programmatic use.
 
 [![Go](https://img.shields.io/badge/Go%201.21+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
-[![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE-MIT)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Features
 
@@ -233,4 +233,4 @@ make vet      # go vet ./...
 
 ## License
 
-Dual-licensed under MIT or Apache-2.0, matching the upstream `fd` project.
+Licensed under the [MIT License](LICENSE).

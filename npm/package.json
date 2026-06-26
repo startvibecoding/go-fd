@@ -24,7 +24,7 @@
     "go"
   ],
   "author": "",
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/startvibecoding/go-fd.git",

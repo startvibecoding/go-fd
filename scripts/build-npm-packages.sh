@@ -136,7 +136,7 @@ for PLATFORM_KEY in "${!PLATFORMS[@]}"; do
   "cpu": ["$CPU"],
   "libc": ["musl"],
   "files": ["bin/"],
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/startvibecoding/go-fd.git",
@@ -154,7 +154,7 @@ EOF
   "cpu": ["$CPU"],
   "libc": ["glibc"],
   "files": ["bin/"],
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/startvibecoding/go-fd.git",
@@ -171,7 +171,7 @@ EOF
   "os": ["$OS"],
   "cpu": ["$CPU"],
   "files": ["bin/"],
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/startvibecoding/go-fd.git",

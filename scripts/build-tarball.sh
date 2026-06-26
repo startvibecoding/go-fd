@@ -44,8 +44,7 @@ cp "${BINARY_FILE}" "${BUILD_DIR}/${TARBALL_NAME}/${BINARY_NAME}"
 
 # Copy documentation and licenses
 [ -f "README.md" ] && cp README.md "${BUILD_DIR}/${TARBALL_NAME}/"
-[ -f "LICENSE-MIT" ] && cp LICENSE-MIT "${BUILD_DIR}/${TARBALL_NAME}/"
-[ -f "LICENSE-APACHE" ] && cp LICENSE-APACHE "${BUILD_DIR}/${TARBALL_NAME}/"
+[ -f "LICENSE" ] && cp LICENSE "${BUILD_DIR}/${TARBALL_NAME}/"
 
 # Create install script
 cat > "${BUILD_DIR}/${TARBALL_NAME}/install.sh" << 'EOF'

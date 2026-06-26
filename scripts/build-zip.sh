@@ -38,8 +38,7 @@ cp "${BINARY_FILE}" "${BUILD_DIR}/${ZIP_NAME}/${BINARY_NAME}.exe"
 
 # Copy documentation and licenses
 [ -f "README.md" ] && cp README.md "${BUILD_DIR}/${ZIP_NAME}/"
-[ -f "LICENSE-MIT" ] && cp LICENSE-MIT "${BUILD_DIR}/${ZIP_NAME}/"
-[ -f "LICENSE-APACHE" ] && cp LICENSE-APACHE "${BUILD_DIR}/${ZIP_NAME}/"
+[ -f "LICENSE" ] && cp LICENSE "${BUILD_DIR}/${ZIP_NAME}/"
 
 # Create install batch file
 cat > "${BUILD_DIR}/${ZIP_NAME}/install.bat" << 'EOF'
