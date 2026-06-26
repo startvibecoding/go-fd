@@ -1,0 +1,8 @@
+/bin/
+*.test
+# build/distribution artifacts
+/dist/
+/npm/bin/
+/npm/packages/
+/npm/*.tgz
+node_modules/

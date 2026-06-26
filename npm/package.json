@@ -1,0 +1,55 @@
+{
+  "name": "go-fd",
+  "version": "10.4.2-go",
+  "description": "A simple, fast and user-friendly alternative to find. Pure Go port of fd.",
+  "bin": {
+    "fd": "bin/fd"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "README.md"
+  ],
+  "keywords": [
+    "fd",
+    "find",
+    "search",
+    "files",
+    "filesystem",
+    "glob",
+    "fast",
+    "go"
+  ],
+  "author": "",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/startvibecoding/go-fd.git",
+    "directory": "npm"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "optionalDependencies": {
+    "go-fd-linux-x64": "10.4.2-go",
+    "go-fd-linux-arm64": "10.4.2-go",
+    "go-fd-linux-arm": "10.4.2-go",
+    "go-fd-linux-ia32": "10.4.2-go",
+    "go-fd-linux-loong64": "10.4.2-go",
+    "go-fd-linux-riscv64": "10.4.2-go",
+    "go-fd-linux-ppc64": "10.4.2-go",
+    "go-fd-linux-s390x": "10.4.2-go",
+    "go-fd-linux-musl-x64": "10.4.2-go",
+    "go-fd-linux-musl-arm64": "10.4.2-go",
+    "go-fd-darwin-x64": "10.4.2-go",
+    "go-fd-darwin-arm64": "10.4.2-go",
+    "go-fd-win32-x64": "10.4.2-go",
+    "go-fd-win32-arm64": "10.4.2-go",
+    "go-fd-win32-ia32": "10.4.2-go",
+    "go-fd-freebsd-x64": "10.4.2-go",
+    "go-fd-freebsd-arm64": "10.4.2-go"
+  }
+}
