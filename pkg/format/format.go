@@ -151,7 +151,8 @@ func replaceSep(s, sep string) string {
 	if sep == "" {
 		return s
 	}
-	return strings.ReplaceAll(s, string(filepath.Separator), sep)
+	s = strings.ReplaceAll(s, "/", sep)
+	return strings.ReplaceAll(s, `\`, sep)
 }
 
 func basename(path string) string {

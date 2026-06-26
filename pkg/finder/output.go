@@ -42,7 +42,8 @@ func replacePathSeparator(path, sep string) string {
 	if sep == "" {
 		return path
 	}
-	return strings.ReplaceAll(path, string(filepath.Separator), sep)
+	path = strings.ReplaceAll(path, "/", sep)
+	return strings.ReplaceAll(path, `\`, sep)
 }
 
 func printFormat(w *bufio.Writer, e *DirEntry, cfg *Config) {

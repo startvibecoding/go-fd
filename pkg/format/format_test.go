@@ -36,4 +36,7 @@ func TestCustomSeparator(t *testing.T) {
 	if got := tmpl.Generate("/foo/bar/baz", "#"); got != "#foo#bar#baz" {
 		t.Errorf("got %q", got)
 	}
+	if got := tmpl.Generate(`C:\foo\bar`, "#"); got != "C:#foo#bar" {
+		t.Errorf("got %q", got)
+	}
 }
