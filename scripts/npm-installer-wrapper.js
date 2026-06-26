@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Wrapper script that resolves and executes the platform-specific binary.
-// When installed via `npm i -g go-fd`, this script finds the
+// When installed via `npm i -g go-fd-installer`, this script finds the
 // correct binary from the platform-specific optional dependency package.
 
 const { execFileSync } = require('child_process');
@@ -113,7 +113,7 @@ function findBinary() {
   console.error(`Searched in: ${searchDirs.join(', ')}`);
   console.error('');
   console.error('If you installed globally, try reinstalling:');
-  console.error('  npm install -g go-fd');
+  console.error('  npm install -g go-fd-installer');
   console.error('');
   console.error('If the problem persists, install via the one-line script instead:');
   console.error('  curl -fsSL https://raw.githubusercontent.com/startvibecoding/go-fd/main/install.sh | bash');
