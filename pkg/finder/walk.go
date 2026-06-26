@@ -217,7 +217,11 @@ func (w *walker) processDir(job dirJob) ([]string, []*ignore.Gitignore) {
 		matched := w.match(entry)
 
 		if matched {
-			w.results <- workerResult{entry: entry}
+			select {
+			case w.results <- workerResult{entry: entry}:
+			case <-w.ctx.Done():
+				return nil, stack
+			}
 		}
 
 		if isDir {

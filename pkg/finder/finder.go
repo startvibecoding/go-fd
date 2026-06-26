@@ -167,6 +167,7 @@ func (f *Finder) Find(ctx context.Context, paths []string) ([]string, error) {
 // surfaces non-fatal traversal errors. Both channels are closed when the search
 // completes. Cancel ctx to stop early.
 func (f *Finder) Stream(ctx context.Context, paths []string) (<-chan Result, <-chan error) {
+	ctx, cancel := context.WithCancel(ctx)
 	out := make(chan Result, 256)
 	errs := make(chan error, 64)
 	raw := make(chan workerResult, 1024)
@@ -174,6 +175,7 @@ func (f *Finder) Stream(ctx context.Context, paths []string) (<-chan Result, <-c
 	f.runWalk(ctx, paths, raw)
 
 	go func() {
+		defer cancel()
 		defer close(out)
 		defer close(errs)
 		count := 0
