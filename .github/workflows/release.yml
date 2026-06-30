@@ -34,13 +34,45 @@ jobs:
           path: dist/**
           if-no-files-found: error
 
+      - name: Verify release assets
+        run: |
+          set -euo pipefail
+          mapfile -t assets < <(
+            find dist -type f \( \
+              -name "*.tar.gz" -o \
+              -name "*.tar.gz.sha256" -o \
+              -name "*.zip" -o \
+              -name "*.zip.sha256" -o \
+              -name "checksums.txt" \
+            \) | sort
+          )
+
+          if [ "${#assets[@]}" -eq 0 ]; then
+            echo "No release assets found under dist/" >&2
+            exit 1
+          fi
+
+          printf "Release assets:\n"
+          printf "  %s\n" "${assets[@]}"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/**/*.tar.gz
-            dist/**/*.tar.gz.sha256
-            dist/**/*.zip
-            dist/**/*.zip.sha256
-            dist/checksums.txt
           generate_release_notes: true
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -t assets < <(
+            find dist -type f \( \
+              -name "*.tar.gz" -o \
+              -name "*.tar.gz.sha256" -o \
+              -name "*.zip" -o \
+              -name "*.zip.sha256" -o \
+              -name "checksums.txt" \
+            \) | sort
+          )
+
+          gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
