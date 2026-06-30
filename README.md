@@ -6,6 +6,7 @@ mirrors the original's interface and a Go SDK for programmatic use.
 
 [![Go](https://img.shields.io/badge/Go%201.21+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release](https://github.com/startvibecoding/go-fd/actions/workflows/release.yml/badge.svg)](https://github.com/startvibecoding/go-fd/actions/workflows/release.yml)
 
 ## Features
 
