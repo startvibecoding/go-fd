@@ -41,3 +41,22 @@ func TestComments(t *testing.T) {
 		t.Errorf("comment should not be a pattern, got %v", got)
 	}
 }
+
+func TestCharacterClassEscaping(t *testing.T) {
+	// \] inside a character class should match a literal ].
+	g := NewFromLines("", []string{"[a\\]b].txt"})
+	cases := []struct {
+		path string
+		want Match
+	}{
+		{"a.txt", Ignore},
+		{"b.txt", Ignore},
+		{"]x.txt", None}, // not in character class
+		{"c.txt", None},
+	}
+	for _, c := range cases {
+		if got := g.Matches(c.path, false); got != c.want {
+			t.Errorf("Matches(%q) = %v, want %v", c.path, got, c.want)
+		}
+	}
+}

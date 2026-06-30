@@ -146,6 +146,19 @@ func parseClass(runes []rune, i int) (int, string, error) {
 		c := runes[j]
 		switch c {
 		case '\\':
+			// \] inside a character class escapes the ] (making it literal).
+			// \X for other X means literal X.
+			if j+1 < n && runes[j+1] == ']' {
+				b.WriteString("\\]")
+				j += 2
+				continue
+			}
+			if j+1 < n {
+				b.WriteString(regexp.QuoteMeta(string(runes[j+1])))
+				j += 2
+				continue
+			}
+			// Trailing backslash: literal
 			b.WriteString("\\\\")
 		case '^', '[':
 			b.WriteByte('\\')

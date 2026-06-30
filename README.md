@@ -69,7 +69,7 @@ The npm package ships a small launcher plus per-platform binary packages
 (`optionalDependencies`), so you only download the binary for your platform.
 
 ```bash
-npm install -g go-fd-installer
+npm install -g @startvibecoding/go-fd-installer
 # Binary available as `fd`
 ```
 

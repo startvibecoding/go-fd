@@ -63,9 +63,6 @@ func (f *Finder) runWalk(ctx context.Context, paths []string, results chan worke
 	}
 
 	threads := f.cfg.Threads
-	if threads < 1 {
-		threads = 1
-	}
 	sem := make(chan struct{}, threads)
 	var wg sync.WaitGroup
 
@@ -280,8 +277,17 @@ func (w *walker) matchExclude(path string, isDir bool) bool {
 }
 
 func containsAny(dir string, names []string) bool {
+	// Read the directory once and check membership in a map.
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false
+	}
+	present := make(map[string]struct{}, len(entries))
+	for _, e := range entries {
+		present[e.Name()] = struct{}{}
+	}
 	for _, n := range names {
-		if _, err := os.Lstat(filepath.Join(dir, n)); err == nil {
+		if _, ok := present[n]; ok {
 			return true
 		}
 	}

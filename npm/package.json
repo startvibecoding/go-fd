@@ -1,6 +1,6 @@
 {
-  "name": "go-fd-installer",
-  "version": "v0.0.1",
+  "name": "@startvibecoding/go-fd-installer",
+  "version": "v0.0.4-pre",
   "description": "A simple, fast and user-friendly alternative to find. Pure Go port of fd.",
   "bin": {
     "fd": "bin/fd"
@@ -34,22 +34,22 @@
     "node": ">=14"
   },
   "optionalDependencies": {
-    "go-fd-linux-x64": "v0.0.1",
-    "go-fd-linux-arm64": "v0.0.1",
-    "go-fd-linux-arm": "v0.0.1",
-    "go-fd-linux-ia32": "v0.0.1",
-    "go-fd-linux-loong64": "v0.0.1",
-    "go-fd-linux-riscv64": "v0.0.1",
-    "go-fd-linux-ppc64": "v0.0.1",
-    "go-fd-linux-s390x": "v0.0.1",
-    "go-fd-linux-musl-x64": "v0.0.1",
-    "go-fd-linux-musl-arm64": "v0.0.1",
-    "go-fd-darwin-x64": "v0.0.1",
-    "go-fd-darwin-arm64": "v0.0.1",
-    "go-fd-win32-x64": "v0.0.1",
-    "go-fd-win32-arm64": "v0.0.1",
-    "go-fd-win32-ia32": "v0.0.1",
-    "go-fd-freebsd-x64": "v0.0.1",
-    "go-fd-freebsd-arm64": "v0.0.1"
+    "@startvibecoding/go-fd-linux-x64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-arm64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-arm": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-ia32": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-loong64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-riscv64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-ppc64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-s390x": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-musl-x64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-linux-musl-arm64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-darwin-x64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-darwin-arm64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-win32-x64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-win32-arm64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-win32-ia32": "v0.0.4-pre",
+    "@startvibecoding/go-fd-freebsd-x64": "v0.0.4-pre",
+    "@startvibecoding/go-fd-freebsd-arm64": "v0.0.4-pre"
   }
 }

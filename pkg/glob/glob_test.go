@@ -42,3 +42,19 @@ func TestCaseInsensitive(t *testing.T) {
 		t.Error("expected case-insensitive match")
 	}
 }
+
+func TestCharacterClassEscaping(t *testing.T) {
+	// \] inside a character class should match a literal ].
+	re, err := Compile("[a\\]b].txt", Options{LiteralSeparator: true})
+	if err != nil {
+		t.Fatalf("compile: %v", err)
+	}
+	for _, input := range []string{"a.txt", "].txt", "b.txt"} {
+		if !re.MatchString(input) {
+			t.Errorf("expected %q to match [a\\]b].txt", input)
+		}
+	}
+	if re.MatchString("c.txt") {
+		t.Error("expected c.txt to not match [a\\]b].txt")
+	}
+}

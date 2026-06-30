@@ -365,7 +365,7 @@ func parseArgs(args []string) (gofd.Options, string, error) {
 
 		if len(arg) > 1 && arg[0] == '-' && arg != "-" {
 			// Short option cluster.
-			newI, consumedRest, err := parseShort(arg[1:], args, i, &opts, &positionals, &baseDir, &unrestrictedCount)
+			newI, _, err := parseShort(arg[1:], args, i, &opts, &positionals, &baseDir, &unrestrictedCount)
 			if err != nil {
 				if err == errHelp {
 					return opts, "", errHelp
@@ -376,7 +376,6 @@ func parseArgs(args []string) (gofd.Options, string, error) {
 				return opts, "", err
 			}
 			i = newI
-			_ = consumedRest
 			continue
 		}
 

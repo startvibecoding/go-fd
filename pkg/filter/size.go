@@ -77,7 +77,10 @@ func ParseSize(s string) (SizeFilter, error) {
 	default:
 		return SizeFilter{}, fmt.Errorf("'%s' is not a valid size constraint. See 'fd --help'.", s)
 	}
-	size := quantity * mult
+	size, overflow := mulOverflow(quantity, mult)
+	if overflow {
+		return SizeFilter{}, fmt.Errorf("'%s' is not a valid size constraint. See 'fd --help'.", s)
+	}
 	switch limitKind {
 	case "+":
 		return SizeFilter{Kind: SizeMin, Limit: size}, nil
@@ -101,4 +104,13 @@ func (f SizeFilter) IsWithin(size uint64) bool {
 		return size == f.Limit
 	}
 	return false
+}
+
+// mulOverflow returns x*y and whether the multiplication overflowed.
+func mulOverflow(x, y uint64) (uint64, bool) {
+	if x == 0 || y == 0 {
+		return 0, false
+	}
+	result := x * y
+	return result, result/x != y
 }

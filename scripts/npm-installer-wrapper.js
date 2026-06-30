@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Wrapper script that resolves and executes the platform-specific binary.
-// When installed via `npm i -g go-fd-installer`, this script finds the
+// When installed via `npm i -g @startvibecoding/go-fd-installer`, this script finds the
 // correct binary from the platform-specific optional dependency package.
 
 const { execFileSync } = require('child_process');
@@ -10,24 +10,24 @@ const fs = require('fs');
 
 // Map npm os/cpu (+libc on linux) to package name
 const PLATFORM_MAP = {
-  'linux-x64-glibc': 'go-fd-linux-x64',
-  'linux-x64-musl': 'go-fd-linux-musl-x64',
-  'linux-arm64-glibc': 'go-fd-linux-arm64',
-  'linux-arm64-musl': 'go-fd-linux-musl-arm64',
-  'linux-arm-glibc': 'go-fd-linux-arm',
-  'linux-arm-musl': 'go-fd-linux-arm',
-  'linux-ia32-glibc': 'go-fd-linux-ia32',
-  'linux-loong64-glibc': 'go-fd-linux-loong64',
-  'linux-riscv64-glibc': 'go-fd-linux-riscv64',
-  'linux-ppc64-glibc': 'go-fd-linux-ppc64',
-  'linux-s390x-glibc': 'go-fd-linux-s390x',
-  'darwin-x64': 'go-fd-darwin-x64',
-  'darwin-arm64': 'go-fd-darwin-arm64',
-  'win32-x64': 'go-fd-win32-x64',
-  'win32-arm64': 'go-fd-win32-arm64',
-  'win32-ia32': 'go-fd-win32-ia32',
-  'freebsd-x64': 'go-fd-freebsd-x64',
-  'freebsd-arm64': 'go-fd-freebsd-arm64',
+  'linux-x64-glibc': '@startvibecoding/go-fd-linux-x64',
+  'linux-x64-musl': '@startvibecoding/go-fd-linux-musl-x64',
+  'linux-arm64-glibc': '@startvibecoding/go-fd-linux-arm64',
+  'linux-arm64-musl': '@startvibecoding/go-fd-linux-musl-arm64',
+  'linux-arm-glibc': '@startvibecoding/go-fd-linux-arm',
+  'linux-arm-musl': '@startvibecoding/go-fd-linux-arm',
+  'linux-ia32-glibc': '@startvibecoding/go-fd-linux-ia32',
+  'linux-loong64-glibc': '@startvibecoding/go-fd-linux-loong64',
+  'linux-riscv64-glibc': '@startvibecoding/go-fd-linux-riscv64',
+  'linux-ppc64-glibc': '@startvibecoding/go-fd-linux-ppc64',
+  'linux-s390x-glibc': '@startvibecoding/go-fd-linux-s390x',
+  'darwin-x64': '@startvibecoding/go-fd-darwin-x64',
+  'darwin-arm64': '@startvibecoding/go-fd-darwin-arm64',
+  'win32-x64': '@startvibecoding/go-fd-win32-x64',
+  'win32-arm64': '@startvibecoding/go-fd-win32-arm64',
+  'win32-ia32': '@startvibecoding/go-fd-win32-ia32',
+  'freebsd-x64': '@startvibecoding/go-fd-freebsd-x64',
+  'freebsd-arm64': '@startvibecoding/go-fd-freebsd-arm64',
 };
 
 function detectPlatform() {
@@ -82,6 +82,11 @@ function findBinary() {
   // or package managers may hoist them as siblings, so check both layouts.
   addSearchDir(path.join(__dirname, '..', 'node_modules', packageName));
   addSearchDir(path.join(__dirname, '..', '..', packageName));
+  if (packageName.startsWith('@')) {
+    const [, scope, name] = packageName.split('/');
+    addSearchDir(path.join(__dirname, '..', '..', name));
+    addSearchDir(path.join(__dirname, '..', '..', '..', scope, name));
+  }
 
   for (const pkgDir of searchDirs) {
     const binName = process.platform === 'win32' ? 'fd.exe' : 'fd';
@@ -113,7 +118,7 @@ function findBinary() {
   console.error(`Searched in: ${searchDirs.join(', ')}`);
   console.error('');
   console.error('If you installed globally, try reinstalling:');
-  console.error('  npm install -g go-fd-installer');
+  console.error('  npm install -g @startvibecoding/go-fd-installer');
   console.error('');
   console.error('If the problem persists, install via the one-line script instead:');
   console.error('  curl -fsSL https://raw.githubusercontent.com/startvibecoding/go-fd/main/install.sh | bash');

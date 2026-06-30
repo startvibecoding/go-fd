@@ -14,7 +14,8 @@ import (
 
 // Finder executes searches according to a Config.
 type Finder struct {
-	cfg *Config
+	cfg      *Config
+	patterns []*regexp.Regexp
 }
 
 // New constructs a Finder, compiling derived state (extension regexes) from the
@@ -45,7 +46,7 @@ func New(cfg *Config) (*Finder, error) {
 // SetPatterns assigns the compiled search patterns. All patterns must match for
 // an entry to be reported.
 func (f *Finder) SetPatterns(patterns []*regexp.Regexp) {
-	f.cfg.patterns = patterns
+	f.patterns = patterns
 }
 
 // Config returns the underlying configuration.
@@ -61,7 +62,7 @@ func (f *Finder) matches(e *DirEntry) bool {
 
 	// Build the string the pattern is matched against.
 	searchStr := f.searchString(e)
-	for _, pat := range cfg.patterns {
+	for _, pat := range f.patterns {
 		if !pat.MatchString(searchStr) {
 			return false
 		}
@@ -334,6 +335,7 @@ func (f *Finder) runExec(ctx context.Context, raw chan workerResult) ExitCode {
 	}
 
 	// One-by-one mode: process results with a worker pool.
+	// Use a small buffer to apply backpressure early when commands are slow.
 	threads := cfg.Threads
 	if threads < 1 {
 		threads = 1
@@ -341,7 +343,7 @@ func (f *Finder) runExec(ctx context.Context, raw chan workerResult) ExitCode {
 	bufferOutput := threads > 1
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	jobs := make(chan *DirEntry, 256)
+	jobs := make(chan *DirEntry, threads)
 
 	for i := 0; i < threads; i++ {
 		wg.Add(1)

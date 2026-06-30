@@ -238,46 +238,46 @@ npm-packages: build-all
 
 npm-pack: npm-version npm-packages
 	@echo "Packing platform packages..."
-	@for d in npm/packages/*/; do \
-		if [ -f "$$d/package.json" ]; then \
-			echo "  Packing $$(basename $$d)..."; \
-			cd "$$d" && npm pack && cd - > /dev/null; \
-			mv "$$d"/*.tgz npm/ 2>/dev/null || true; \
-		fi; \
+	@find npm/packages -mindepth 2 -maxdepth 3 -name package.json -print | sort | while read -r pkg; do \
+		d=$$(dirname "$$pkg"); \
+		echo "  Packing $$(basename "$$d")..."; \
+		cd "$$d" && npm pack && cd - > /dev/null; \
+		mv "$$d"/*.tgz npm/ 2>/dev/null || true; \
 	done
 	@echo "Packing main package..."
 	cd npm && npm pack
 	@echo "Done. Tarballs in npm/"
 
+# Publish platform packages first, then main
 npm-publish-all: npm-version npm-packages
 	@echo "Publishing platform packages..."
-	@for d in npm/packages/*/; do \
-		if [ -f "$$d/package.json" ]; then \
-			echo "  Publishing $$(basename $$d)..."; \
-			cd "$$d" && npm publish --tag latest && cd - > /dev/null; \
-		fi; \
+	@find npm/packages -mindepth 2 -maxdepth 3 -name package.json -print | sort | while read -r pkg; do \
+		d=$$(dirname "$$pkg"); \
+		echo "  Publishing $$(basename "$$d")..."; \
+		cd "$$d" && npm publish --access public --tag latest && cd - > /dev/null; \
 	done
 	@echo "Publishing main package..."
-	cd npm && npm publish --tag latest
+	cd npm && npm publish --access public --tag latest
 	@echo "Published all packages!"
 
+# Publish pre-release
 npm-publish-pre:
 	./scripts/sync-npm-version.sh $(PRE_VERSION)
 	$(MAKE) npm-packages VERSION=$(PRE_VERSION)
-	@echo "Publishing pre-release platform packages..."
-	@for d in npm/packages/*/; do \
-		if [ -f "$$d/package.json" ]; then \
-			echo "  Publishing $$(basename $$d)..."; \
-			cd "$$d" && npm publish --tag next && cd - > /dev/null; \
-		fi; \
+	@echo "Publishing platform packages (pre-release)..."
+	@find npm/packages -mindepth 2 -maxdepth 3 -name package.json -print | sort | while read -r pkg; do \
+		d=$$(dirname "$$pkg"); \
+		echo "  Publishing $$(basename "$$d")..."; \
+		cd "$$d" && npm publish --access public --tag next && cd - > /dev/null; \
 	done
-	@echo "Publishing main package (next)..."
-	cd npm && npm publish --tag next
+	@echo "Publishing main package (pre-release)..."
+	cd npm && npm publish --access public --tag next
+	@echo "Published all packages (pre-release)!"
 
 # Legacy: publish main package only (use npm-publish-all instead)
 npm-publish: npm-version npm-binaries
 	@echo "WARNING: npm-publish is deprecated, use npm-publish-all instead" >&2
-	cd npm && npm publish --tag latest
+	cd npm && npm publish --access public --tag latest
 
 # Clean
 clean:

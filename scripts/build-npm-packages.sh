@@ -100,7 +100,7 @@ for PLATFORM_KEY in "${!PLATFORMS[@]}"; do
   BINARY_NAME="${PLATFORMS[$PLATFORM_KEY]}"
   OS="${OS_MAP[$PLATFORM_KEY]}"
   CPU="${CPU_MAP[$PLATFORM_KEY]}"
-  PKG_NAME="go-fd-${PLATFORM_KEY}"
+  PKG_NAME="@startvibecoding/go-fd-${PLATFORM_KEY}"
   PKG_DIR="$PACKAGES_DIR/$PKG_NAME"
 
   # Check binary exists

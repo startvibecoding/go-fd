@@ -44,3 +44,16 @@ func TestSizeIsWithin(t *testing.T) {
 		t.Error("min filter boundary incorrect")
 	}
 }
+
+func TestParseSizeOverflow(t *testing.T) {
+	// Values that parse fine as uint64 but overflow when multiplied by the unit.
+	// max uint64 = 18446744073709551615.
+	// 18446744073710 * 1T (=10^12) = 18446744073710000000000 > max uint64.
+	if _, err := ParseSize("+18446744073710t"); err == nil {
+		t.Error("expected overflow error for 18446744073710t")
+	}
+	// 18446744074 * 1G (=10^9) also overflows.
+	if _, err := ParseSize("+18446744074g"); err == nil {
+		t.Error("expected overflow error for 18446744074g")
+	}
+}

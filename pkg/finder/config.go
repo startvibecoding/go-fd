@@ -157,7 +157,6 @@ type Config struct {
 	AbsolutePath bool
 
 	// compiled fields (populated by the finder)
-	patterns      []*regexp.Regexp
 	extensionsRes []*regexp.Regexp
 }
 

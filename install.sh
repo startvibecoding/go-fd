@@ -126,9 +126,11 @@ uninstall() {
     if command -v npm &> /dev/null; then
         local npm_global
         npm_global=$(npm root -g 2>/dev/null || true)
-        if [ -n "$npm_global" ] && { [ -d "$npm_global/go-fd" ] || [ -d "$npm_global/go-fd-installer" ]; }; then
+        if [ -n "$npm_global" ] && { [ -d "$npm_global/go-fd" ] || [ -d "$npm_global/go-fd-installer" ] || [ -d "$npm_global/@startvibecoding/go-fd-installer" ]; }; then
             local pkg_to_uninstall="go-fd"
-            if [ -d "$npm_global/go-fd-installer" ]; then
+            if [ -d "$npm_global/@startvibecoding/go-fd-installer" ]; then
+                pkg_to_uninstall="@startvibecoding/go-fd-installer"
+            elif [ -d "$npm_global/go-fd-installer" ]; then
                 pkg_to_uninstall="go-fd-installer"
             fi
             read -rp "Uninstall npm package ($pkg_to_uninstall)? [y/N] " answer
