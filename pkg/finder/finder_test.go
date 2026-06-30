@@ -121,6 +121,21 @@ func TestMatchesFullPath(t *testing.T) {
 	}
 }
 
+func TestMatchesFullPathUsesSlashSeparators(t *testing.T) {
+	f, err := New(&Config{FullPathBase: `C:\work\go-fd`})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	re := regexp.MustCompile(`(?is)go-fd/gofd_finder_test/.*\.go$`)
+	f.SetPatterns([]*regexp.Regexp{re})
+
+	entry := &DirEntry{path: `gofd_finder_test\main.go`, depth: 2}
+	if !f.matches(entry) {
+		t.Error("expected full-path pattern with slash separators to match Windows-style path")
+	}
+}
+
 func TestMatchesMinDepth(t *testing.T) {
 	depth := 2
 	f, err := New(&Config{MinDepth: &depth})

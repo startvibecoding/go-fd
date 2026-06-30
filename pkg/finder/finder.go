@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -131,12 +132,16 @@ func (f *Finder) searchString(e *DirEntry) string {
 	if f.cfg.FullPathBase != "" {
 		p := e.Path()
 		if filepath.IsAbs(p) {
-			return p
+			return pathForPattern(p)
 		}
 		p = stripCurrentDir(p)
-		return filepath.Join(f.cfg.FullPathBase, p)
+		return pathForPattern(filepath.Join(f.cfg.FullPathBase, p))
 	}
 	return e.fileName()
+}
+
+func pathForPattern(path string) string {
+	return strings.ReplaceAll(filepath.ToSlash(path), `\`, `/`)
 }
 
 // Result is a single matched entry surfaced through the SDK.
